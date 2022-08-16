@@ -4,7 +4,7 @@ import br.com.fiap.entities.Department;
 
 import java.util.List;
 
-public interface DepartmentDAO {
+public interface DepartmentDao {
     void insert(Department obj);
     void update(Department obj);
     void deleteById(Integer id);
