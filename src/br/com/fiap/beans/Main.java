@@ -5,6 +5,7 @@ import br.com.fiap.dao.SellerDao;
 import br.com.fiap.entities.Department;
 import br.com.fiap.entities.Seller;
 
+import java.util.Date;
 import java.util.List;
 
 public class Main {
@@ -30,5 +31,12 @@ public class Main {
         for (Seller seller1 : list) {
             System.out.println(seller1);
         }
+
+        System.out.println("\n==========Test 4: seller insert===========");
+        Seller newSeller = new Seller(null, "Vitor", "mantovanifreitasvitor@gmail.com", new Date(), 5000.00, department);
+
+        sellerDao.insert(newSeller);
+
+        System.out.println("Inserted! New id = " + newSeller.getId());
     }
 }
