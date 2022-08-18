@@ -54,6 +54,8 @@ public class Main {
         sellerDao.deleteById(id);
         System.out.println("Deleted completed!");
 
+        scanner.close();
+
 
     }
 }
