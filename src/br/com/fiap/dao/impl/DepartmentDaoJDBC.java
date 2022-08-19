@@ -3,6 +3,7 @@ package br.com.fiap.dao.impl;
 import br.com.fiap.dao.DepartmentDao;
 import br.com.fiap.db.DB;
 import br.com.fiap.db.DbException;
+import br.com.fiap.db.DbIntegrityException;
 import br.com.fiap.entities.Department;
 
 import java.sql.*;
@@ -82,7 +83,7 @@ public class DepartmentDaoJDBC implements DepartmentDao {
             preparedStatement.executeUpdate();
         }
         catch (SQLException e) {
-            throw new DbException(e.getMessage());
+            throw new DbIntegrityException(e.getMessage());
         }
         finally {
             DB.closeStatement(preparedStatement);

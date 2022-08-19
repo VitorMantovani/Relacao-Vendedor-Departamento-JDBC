@@ -3,6 +3,7 @@ package br.com.fiap.dao.impl;
 import br.com.fiap.dao.SellerDao;
 import br.com.fiap.db.DB;
 import br.com.fiap.db.DbException;
+import br.com.fiap.db.DbIntegrityException;
 import br.com.fiap.entities.Department;
 import br.com.fiap.entities.Seller;
 
@@ -29,6 +30,7 @@ public class SellerDaoJDBC implements SellerDao {
                     + "(Name, Email, BirthDate, BaseSalary, DepartmentId) "
                     + "VALUES "
                     + "(?, ?, ?, ?, ?)",
+                    //Retorna o códido(Id) do novo objeto inserido no banco
                     Statement.RETURN_GENERATED_KEYS
             );
 
@@ -40,6 +42,7 @@ public class SellerDaoJDBC implements SellerDao {
 
             int rowsAffected = statement.executeUpdate();
 
+            //Se rowsAffected for maior do que zero, mostrar a chave que foi gerada
             if (rowsAffected > 0) {
                 ResultSet resultSet = statement.getGeneratedKeys();
                 if(resultSet.next()) {
@@ -47,8 +50,10 @@ public class SellerDaoJDBC implements SellerDao {
                     obj.setId(id);
                 }
                 DB.closeResultSet(resultSet);
+
+            //Se não, mostrar que nenhuma linha foi alterada
             } else {
-                throw new DbException("Unexpected error! No rows affected!");
+                throw new DbException("Erro inexperado! Nenhuma linha afetada!");
             }
         } catch (SQLException e) {
             throw new DbException(e.getMessage());
@@ -90,16 +95,11 @@ public class SellerDaoJDBC implements SellerDao {
                     "DELETE FROM seller "
                     +"WHERE id = ?"
             );
-
             preparedStatement.setInt(1, id);
 
-           int rows =  preparedStatement.executeUpdate();
-
-           if (rows == 0) {
-               throw new DbException("Id does not exist!");
-           }
+            preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new DbException(e.getMessage());
+            throw new DbIntegrityException(e.getMessage());
         } finally {
             DB.closeStatement(preparedStatement);
         }
@@ -134,7 +134,7 @@ public class SellerDaoJDBC implements SellerDao {
     }
 
     private Seller instantiateSeller(ResultSet resultSet, Department department) throws SQLException {
-        Seller seller =new Seller();
+        Seller seller = new Seller();
         seller.setId(resultSet.getInt("Id"));
         seller.setName(resultSet.getString("Name"));
         seller.setEmail(resultSet.getString("Email"));
@@ -205,11 +205,19 @@ public class SellerDaoJDBC implements SellerDao {
             resultSet = statement.executeQuery();
 
             List<Seller> list = new ArrayList<>();
+            //Esse map vai guardar os departamentos que vão ser instanciados
             Map<Integer, Department> map = new HashMap<>();
+            //Como são vários valores utilizo um while para percorrer o resultset
             while (resultSet.next()) {
-
+                /*
+                * Testa se o departamento já existe
+                * Com o método .get() tento buscar um departamento que tenha o Id
+                * passado como parametro
+                * Caso o map não possua um departamento com o Id passado o metedo get
+                * vai retornar nulo, sendo nulo o departamento pode ser instanciado
+                */
                 Department dep = map.get(resultSet.getInt("DepartmentId"));
-
+                
                 if (dep == null) {
                     dep = instantiateDepartment(resultSet);
                     map.put(resultSet.getInt("DepartmentId"), dep);
